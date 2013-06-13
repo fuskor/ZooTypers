@@ -5,8 +5,8 @@ import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -21,6 +21,7 @@ import com.example.zootypers.R;
 import com.example.zootypers.core.MultiLeaderBoardModel;
 import com.example.zootypers.core.ScoreEntry;
 import com.example.zootypers.core.SingleLeaderBoardModel;
+import com.example.zootypers.util.InterfaceUtils;
 import com.example.zootypers.util.InternetConnectionException;
 import com.parse.Parse;
 import com.parse.ParseUser;
@@ -39,20 +40,19 @@ public class Leaderboard extends FragmentActivity {
 	private SingleLeaderBoardModel lb;
 	private MultiLeaderBoardModel mlb;
 	private Fragment mainCurrentFragment;
-	private final int NUM_RELATIVE = 5;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		Log.i("Leaderboard", "entered leaderboard");
 
 		// set the layout for the parent activity which contains the fragments
 		setContentView(R.layout.activity_leaderboard);
 
 		// Initialize the database according to whether it's a test or not.
-		int useTestDB = getIntent().getIntExtra("Testing", 0);
-		Log.e("Extra", "INTENT " + useTestDB);
-		if (useTestDB == 1) { //The Testing Database on Parse
+		Log.d("Leaderboard: Using Test Database", "" + TitlePage.useTestDB);
+		if (TitlePage.useTestDB) { //The Testing Database on Parse
 			Parse.initialize(this, "E8hfMLlgnEWvPw1auMOvGVsrTp1C6eSoqW1s6roq",
 			"hzPRfP284H5GuRzIFDhVxX6iR9sgTwg4tJU08Bez"); 
 		} else { //The Real App Database on Parse
@@ -70,9 +70,9 @@ public class Leaderboard extends FragmentActivity {
 		actionBar.setDisplayUseLogoEnabled(false);
 
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-		ActionBar.Tab singlePlayerTab = actionBar.newTab().setText("Singleplayer");
-		ActionBar.Tab multiPlayerTab = actionBar.newTab().setText("Multiplayer");
-		ActionBar.Tab relativeUserScoreTab = actionBar.newTab().setText("Relative\nPosition");
+		ActionBar.Tab singlePlayerTab = actionBar.newTab().setText(R.string.single_player_tab);
+		ActionBar.Tab multiPlayerTab = actionBar.newTab().setText(R.string.multi_player_tab);
+		ActionBar.Tab relativeUserScoreTab = actionBar.newTab().setText(R.string.relative_tab);
 
 		// get the list of scores from the model and send it to each of the tabs
 
@@ -141,20 +141,20 @@ public class Leaderboard extends FragmentActivity {
 				return;
 			}
 			int userRank = mlb.getRank();
-			// get the relative position of the user with the passed in NUM_RELATIVE
-			ScoreEntry[] relativeEntrys = mlb.getRelativeScores(NUM_RELATIVE);
 			// inform the user that he/she has no scores yet
-			if (relativeEntrys.length == 0) {
-				final String title = "No scores yet";
-				final String message = "You do not have any scores yet. Play " +
-				"games to figure out where you rank!!";
-				Options.buildAlertDialog(title, message, this);
+			
+			if (userRank <= 0) {
+				InterfaceUtils.buildAlertDialog(this, 
+				R.string.no_scores_title, R.string.no_scores_msg);
 				return;
 			}
+			int highestRank = mlb.getHighestRelScoreRank();
+			// get the relative position of the user with the passed in NUM_RELATIVE
+			ScoreEntry[] relativeEntrys = mlb.getRelativeScores();
 
 			// add the relativeScore tab
-			Fragment currentFragment = RelativeUserScoreTab.newInstance(relativeEntrys, userRank,
-			NUM_RELATIVE);
+			Fragment currentFragment = RelativeUserScoreTab.newInstance(relativeEntrys, 
+			userRank, highestRank);
 			FragmentTransaction fst = getSupportFragmentManager().beginTransaction();
 			fst.replace(R.id.leaderboard_layout, currentFragment);
 			fst.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);

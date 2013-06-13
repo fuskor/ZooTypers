@@ -27,7 +27,6 @@ public class PreGameSelectionMulti extends PreGameSelection {
 	@Override
 	protected final void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		setContentView(R.layout.activity_pregame_selection_multi);
 
 		animal = findViewById(R.id.elephant_button);
@@ -49,7 +48,7 @@ public class PreGameSelectionMulti extends PreGameSelection {
 	 * @param view The button clicked.
 	 */
 	public final void goToMultiPlayer(final View view) {
-    	Log.i("ZooTypers", "begin multiplayer game");
+		Log.i("ZooTypers", "begin multiplayer game");
 
 		Intent intent = new Intent(this, MultiPlayer.class);
 

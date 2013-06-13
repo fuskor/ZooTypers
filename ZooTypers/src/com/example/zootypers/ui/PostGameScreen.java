@@ -4,10 +4,9 @@ package com.example.zootypers.ui;
 import android.annotation.SuppressLint;
 import android.app.ActionBar.LayoutParams;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -23,6 +22,7 @@ import android.widget.TextView;
 
 import com.example.zootypers.R;
 import com.example.zootypers.core.SingleLeaderBoardModel;
+import com.example.zootypers.util.InterfaceUtils;
 
 /**
  *
@@ -41,6 +41,7 @@ public class PostGameScreen extends Activity {
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		Log.i("ZooTypers", "entered post game");
 
 		savedScore = false;
@@ -108,9 +109,8 @@ public class PostGameScreen extends Activity {
 	@SuppressLint("InlinedApi")
 	private void buildSavePopup() {
 		if (savedScore) {
-			final String title = "Score already saved";
-			final String message = "You cannot save your current score more than once";
-			Options.buildAlertDialog(title, message, this);
+			InterfaceUtils.buildAlertDialog(this, 
+			R.string.already_saved_title, R.string.already_saved_msg);
 			return;
 		}
 		LayoutInflater layoutInflater =
@@ -151,9 +151,7 @@ public class PostGameScreen extends Activity {
 	    // send the input the the leaderboard model
 	    SingleLeaderBoardModel sl = new SingleLeaderBoardModel(getApplicationContext());
     	sl.addEntry(savedNameString, score);
-		final String title = "Saved Score";
-		final String message = "Your score has been successfully saved!";
-		Options.buildAlertDialog(title, message, this);
+		InterfaceUtils.buildAlertDialog(this, R.string.saved_title, R.string.saved_msg);
 		ppw.dismiss();
 	}
 }

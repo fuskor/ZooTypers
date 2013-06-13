@@ -7,8 +7,9 @@ import java.io.IOException;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
+
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,6 +27,7 @@ import android.widget.TextView;
 import com.example.zootypers.R;
 import com.example.zootypers.core.MultiLeaderBoardModel;
 import com.example.zootypers.core.SingleLeaderBoardModel;
+import com.example.zootypers.util.InterfaceUtils;
 import com.example.zootypers.util.InternetConnectionException;
 import com.parse.Parse;
 import com.parse.ParseUser;
@@ -41,7 +43,7 @@ public class Options extends Activity {
 
 	LoginPopup lp;
 	ParseUser currentUser;
-	private int useTestDB;
+	private boolean useTestDB;
 
 	@Override
 	protected final void onCreate(final Bundle savedInstanceState) {
@@ -50,6 +52,7 @@ public class Options extends Activity {
 		Log.i("Options", "entered options");
 
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		setContentView(R.layout.activity_options);
 		lp = new LoginPopup(currentUser);
 
@@ -114,9 +117,8 @@ public class Options extends Activity {
 		Log.i("Options", "clearing single player leaderboard");
 		SingleLeaderBoardModel sl = new SingleLeaderBoardModel(this.getApplicationContext());
 		sl.clearLeaderboard();
-		final String title = "Cleared Leaderboard";
-		final String message = "The single player leaderboard has been successfully cleared.";
-		buildAlertDialog(title, message, this);
+		InterfaceUtils.buildAlertDialog(this, R.string.clear_lb_title, R.string.clear_lbs_msg);
+
 	}
 
 	/**
@@ -125,10 +127,9 @@ public class Options extends Activity {
 	public final void clearMulti(final View view) {
 		Log.i("Options", "clearing multiplayer leaderboard");
 
-		useTestDB = getIntent().getIntExtra("Testing", 0);
-		Log.e("Extra", "INTENT " + useTestDB);
 		// Initialize the database
-		if (useTestDB == 1) {
+		Log.d("Options: Using Test Database", "" + TitlePage.useTestDB);
+		if (TitlePage.useTestDB) {
 			Parse.initialize(this, "E8hfMLlgnEWvPw1auMOvGVsrTp1C6eSoqW1s6roq",
 			"hzPRfP284H5GuRzIFDhVxX6iR9sgTwg4tJU08Bez"); 
 		} else {
@@ -155,9 +156,9 @@ public class Options extends Activity {
 				return;
 			}
 			ml.clearLeaderboard();
-			final String title = "Cleared Leaderboard";
-			final String message = "Your multiplayer scores have been successfully cleared.";
-			buildAlertDialog(title, message, this);
+
+			InterfaceUtils.buildAlertDialog(this, R.string.clear_lb_title, R.string.clear_lbm_msg);
+
 		}
 	}
 
@@ -295,32 +296,4 @@ public class Options extends Activity {
 	}
 
 	// TODO remove repetition from title page / post game / leaderboard
-	/**
-	 * builds an AlertDialog popup with the given title and message
-	 * @param title String representing title of the AlertDialog popup
-	 * @param message String representing the message of the AlertDialog
-	 * popup
-	 */
-	public static void buildAlertDialog(String title, String message, Activity act) {
-		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(act);
-		// set title
-		alertDialogBuilder.setTitle(title);
-
-		// set dialog message
-		alertDialogBuilder
-		.setMessage(message)
-		.setCancelable(false)
-		.setPositiveButton("Close", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				// if this button is clicked, close the dialog box
-				dialog.cancel();
-			}
-		});
-
-		// create alert dialog
-		AlertDialog alertDialog = alertDialogBuilder.create();
-
-		// show the message
-		alertDialog.show();
-	}
 }

@@ -8,6 +8,7 @@ import com.parse.ParseUser;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.*;
@@ -28,23 +29,24 @@ public class TitlePage extends Activity {
 	// used for figuring out valid login inputs
 	boolean foundUser;
 	boolean foundPassword;
-	
-	private int useTestDB;
+
+	public static boolean useTestDB;
 
 	@Override
 	protected final void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
 		setContentView(R.layout.activity_title_page);
 		// initialize the Intent to go to Pregame selection
 		multiIntent = new Intent(this, PreGameSelectionMulti.class);
-		
+
 		//used intent to allow testing or not
-		useTestDB = getIntent().getIntExtra("Testing", 0);
-		Log.e("Extra", "INTENT " + useTestDB);
+		useTestDB = getIntent().getBooleanExtra("Testing", false);
+		Log.d("Title: Using Test Database", "" + TitlePage.useTestDB);
 		// Initialize the database
-		if (useTestDB == 1) {
+		if (useTestDB) {
 			Parse.initialize(this, "E8hfMLlgnEWvPw1auMOvGVsrTp1C6eSoqW1s6roq",
 			"hzPRfP284H5GuRzIFDhVxX6iR9sgTwg4tJU08Bez"); 
 		} else {
@@ -99,9 +101,6 @@ public class TitlePage extends Activity {
 	public final void goToLeaderboard(final View view) {
 		Log.i("ZooTypers", "Proceeding to leaderboard");
 		Intent intent = new Intent(this, Leaderboard.class);
-		if (useTestDB == 1) {
-		    intent.putExtra("Testing", 1);
-		}
 		startActivity(intent);
 	}
 
@@ -160,7 +159,7 @@ public class TitlePage extends Activity {
 	 */
 	public final void forgotPassword(final View view) {
 		Log.i("ZooTypers", "user has forgotten password");
-		
+
 		// set up the layout inflater to inflate the popup layout
 		LayoutInflater layoutInflater =
 		(LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
